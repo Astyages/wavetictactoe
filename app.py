@@ -8,7 +8,6 @@ import re
 SERVER = 'o'
 PLAYER = 'x'
 
-
 # HELPER FILES
 def validate_board(board):
     try:
@@ -21,16 +20,6 @@ def empty_spaces(board):
     empty_spaces_iter = re.finditer(' ', board)
     empty_spaces_list = [cell.start() for cell in empty_spaces_iter]
     return empty_spaces_list
-
-def make_move(board):
-    possible_moves = empty_spaces(board)
-    if possible_moves == []:
-        return board
-    random_move = int(choice(possible_moves))
-    board = '{}{}{}'.format(
-        board[:random_move], 'o', board[random_move+1:]
-        )
-    return board
 
 def determine_turn(board):
     possible_moves = empty_spaces(board)
@@ -111,14 +100,30 @@ def minimax(board, depth, player):
 
     return best
 
+def make_move(board):
+    possible_moves = empty_spaces(board)
+    if possible_moves == []:
+        return board
+
+    depth = len(board) - len(possible_moves)
+    player = determine_turn(board)
+    if depth == 0:
+        move = choice(range(10))
+    else:
+        move = minimax(board, depth, player)
+        move = move[0]
+
+    board = '{}{}{}'.format(
+        board[:move], SERVER, board[move+1:]
+        )
+    return board
+
 # APPLICATION
 app = Chalice(app_name='wavetictactoe')
 
-
-#@app.route('/')
-#def main():
-#    board = app.current_request.query_params.get('board')
-#    board = validate_board(board)
-#    board = make_move(board)
-#    board = match_state(board)
-#    return board
+@app.route('/')
+def main():
+    board = app.current_request.query_params.get('board')
+    board = validate_board(board)
+    board = make_move(board)
+    return board
