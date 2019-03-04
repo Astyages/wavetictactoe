@@ -3,6 +3,11 @@ from chalice import BadRequestError
 from random import choice
 import re
 
+# GLOBAL VARIABLES
+SERVER = 'o'
+PLAYER = 'x'
+
+
 # HELPER FILES
 def validate_board(board):
     try:
@@ -25,6 +30,26 @@ def make_move(board):
         board[:random_move], 'o', board[random_move+1:]
         )
     return board
+
+def determine_turn(board):
+    possible_moves = empty_cells(board)
+    server_moves = board.count(SERVER)
+    player_moves = board.count(PLAYER)
+    if abs(server_moves - player_moves) > 1:
+        raise BadRequestError('Implausible board state')
+
+    if len(possible_moves) == 9:
+        # empty board, anyone can start
+        return SERVER
+    elif server_moves == player_moves:
+        # plausibly server's turn:
+        return SERVER
+    elif server_moves > player_moves:
+        return PLAYER
+    elif server_moves < player_moves:
+        return SERVER
+
+
 
 # APPLICATION
 app = Chalice(app_name='wavetictactoe')
