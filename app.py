@@ -54,7 +54,7 @@ def match_state(board):
     possible_moves = empty_spaces(board)
     if possible_moves == []:
         # no more moves; draw
-        return board, 'GAME OVER'
+        return board, 'GAME OVER', 0
 
     server_board_eval = board.replace(SERVER, '1')
     player_board_eval = board.replace(PLAYER, '1')    
@@ -75,7 +75,7 @@ def match_state(board):
                          if move is not None]
     server_won = sum(server_board_eval) >= 1
     player_won = sum(player_board_eval) >= 1
-    if server_won
+    if server_won:
         return board, 'SERVER WON', +1
     elif player_won:
         return board, 'PLAYER WON', -1
@@ -95,9 +95,12 @@ def minimax(board, depth, player):
         return [None, final_score]
 
     for space in empty_spaces(board):
-        board[space] = player
+        board = '{}{}{}'.format(
+            board[:space], player, board[space+1:]
+            )
         next_player = determine_turn(board)
         score = minimax(board, depth + 1, next_player)
+        score[0] = space
         
         if player == SERVER:
             if score[1] > best[1]:
@@ -106,14 +109,16 @@ def minimax(board, depth, player):
             if score[1] < best[1]:
                 best = score  
 
+    return best
+
 # APPLICATION
 app = Chalice(app_name='wavetictactoe')
 
 
-@app.route('/')
-def main():
-    board = app.current_request.query_params.get('board')
+#@app.route('/')
+#def main():
+#    board = app.current_request.query_params.get('board')
 #    board = validate_board(board)
 #    board = make_move(board)
-    board = match_state(board)
-    return board
+#    board = match_state(board)
+#    return board
