@@ -62,12 +62,16 @@ def match_state(board):
         r'1..1..1..', r'.1..1..1.', r'..1..1..1',  # vertical
         r'1...1...1', r'..1.1.1..'  # diagonal
         ]
-    server_board_eval = [re.search(move, server_board_eval).group() 
-                         is not None 
+    server_board_eval = [re.search(move, server_board_eval) 
                          for move in winning_moves]
-    player_board_eval = [re.search(move, player_board_eval).group() 
-                         is not None
+    server_board_eval = [True  
+                         for move in server_board_eval 
+                         if move is not None]
+    player_board_eval = [re.search(move, player_board_eval)        
                          for move in winning_moves]
+    player_board_eval = [True         
+                         for move in player_board_eval
+                         if move is not None]
     server_won = sum(server_board_eval) >= 1
     player_won = sum(player_board_eval) >= 1
     if server_won or player_won:
@@ -82,6 +86,7 @@ app = Chalice(app_name='wavetictactoe')
 @app.route('/')
 def main():
     board = app.current_request.query_params.get('board')
-    board = validate_board(board)
-    board = make_move(board)
+#    board = validate_board(board)
+#    board = make_move(board)
+    board = match_state(board)
     return board
