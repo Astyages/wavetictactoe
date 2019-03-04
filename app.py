@@ -49,7 +49,31 @@ def determine_turn(board):
     elif server_moves < player_moves:
         return SERVER
 
+def match_state(board):
+    possible_moves = empty_cells(board)
+    if possible_moves == []:
+        # no more moves; draw
+        return board, 'GAME OVER'
 
+    server_board_eval = board.replace(SERVER, '1')
+    player_board_eval = board.replace(PLAYER, '1')    
+    winning_moves = [
+        r'111......', r'...111...', r'......111',  # horizontal
+        r'1..1..1..', r'.1..1..1.', r'..1..1..1',  # vertical
+        r'1...1...1', r'..1.1.1..'  # diagonal
+        ]
+    server_board_eval = [re.search(move, server_board_eval).group() 
+                         is not None 
+                         for move in winning_moves]
+    player_board_eval = [re.search(move, player_board_eval).group() 
+                         is not None
+                         for move in winning_moves]
+    server_won = sum(server_board_eval) >= 1
+    player_won = sum(player_board_eval) >= 1
+    if server_won or player_won:
+       return board, 'GAME OVER'
+    
+    return board, 'GAME ONGOING'
 
 # APPLICATION
 app = Chalice(app_name='wavetictactoe')
