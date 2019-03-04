@@ -25,8 +25,8 @@ def determine_turn(board):
     possible_moves = empty_spaces(board)
     server_moves = board.count(SERVER)
     player_moves = board.count(PLAYER)
-    if abs(server_moves - player_moves) > 1:
-        raise BadRequestError('Implausible board state')
+    #if abs(server_moves - player_moves) > 1:
+    #    raise BadRequestError('Implausible board state')
 
     if len(possible_moves) == 9:
         # empty board, anyone can start
@@ -72,6 +72,7 @@ def match_state(board):
     return board, 'GAME ONGOING', 0
 
 def minimax(board, depth, player):
+    print(board)
     # worst scores
     if player == SERVER:
         best = [None, -inf]
@@ -107,6 +108,9 @@ def make_move(board):
 
     depth = len(board) - len(possible_moves)
     player = determine_turn(board)
+    if player != SERVER:
+        return board
+
     if depth == 0:
         move = choice(range(10))
     else:
