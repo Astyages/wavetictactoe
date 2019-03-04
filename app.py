@@ -1,6 +1,7 @@
 from chalice import Chalice
 from chalice import BadRequestError
 from random import choice
+from math import inf 
 import re
 
 # GLOBAL VARIABLES
@@ -16,13 +17,13 @@ def validate_board(board):
         raise BadRequestError('Invalid board')
     return board
 
-def empty_cells(board):
-    empty_cells_iter = re.finditer(' ', board)
-    empty_cells_list = [cell.start() for cell in empty_cells_iter]
-    return empty_cells_list
+def empty_spaces(board):
+    empty_spaces_iter = re.finditer(' ', board)
+    empty_spaces_list = [cell.start() for cell in empty_spaces_iter]
+    return empty_spaces_list
 
 def make_move(board):
-    possible_moves = empty_cells(board)
+    possible_moves = empty_spaces(board)
     if possible_moves == []:
         return board
     random_move = int(choice(possible_moves))
@@ -32,7 +33,7 @@ def make_move(board):
     return board
 
 def determine_turn(board):
-    possible_moves = empty_cells(board)
+    possible_moves = empty_spaces(board)
     server_moves = board.count(SERVER)
     player_moves = board.count(PLAYER)
     if abs(server_moves - player_moves) > 1:
@@ -50,7 +51,7 @@ def determine_turn(board):
         return SERVER
 
 def match_state(board):
-    possible_moves = empty_cells(board)
+    possible_moves = empty_spaces(board)
     if possible_moves == []:
         # no more moves; draw
         return board, 'GAME OVER'
@@ -74,10 +75,36 @@ def match_state(board):
                          if move is not None]
     server_won = sum(server_board_eval) >= 1
     player_won = sum(player_board_eval) >= 1
-    if server_won or player_won:
-       return board, 'GAME OVER'
+    if server_won
+        return board, 'SERVER WON', +1
+    elif player_won:
+        return board, 'PLAYER WON', -1
     
-    return board, 'GAME ONGOING'
+    return board, 'GAME ONGOING', 0
+
+def minimax(board, depth, player):
+    # worst scores
+    if player == SERVER:
+        best = [None, -inf]
+    elif player == PLAYER:
+        best = [None, +inf]
+    
+    board, game_state, score = match_state(board)
+    if game_state != 'GAME ONGOING':
+        final_score = score
+        return [None, final_score]
+
+    for space in empty_spaces(board):
+        board[space] = player
+        next_player = determine_turn(board)
+        score = minimax(board, depth + 1, next_player)
+        
+        if player == SERVER:
+            if score[1] > best[1]:
+                best = score  
+        elif player == PLAYER:
+            if score[1] < best[1]:
+                best = score  
 
 # APPLICATION
 app = Chalice(app_name='wavetictactoe')
